@@ -14,14 +14,20 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/admin/users")
 public class UserController {
     private UserRepository repository;
     private UserModelAssembler assembler;
 
+    public UserController(UserRepository userRepository,UserModelAssembler userModelAssembler){
+        this.repository = userRepository;
+        this.assembler = userModelAssembler;
+    }
+
     @GetMapping("")
-    public CollectionModel<EntityModel<User>> all(){
-        List<EntityModel<User>> entityModelList = repository.findAll().stream()
+    public CollectionModel<EntityModel<UserWithAccountDto>> all(){
+        List<EntityModel<UserWithAccountDto>> entityModelList = repository.findAll().stream()
+                .map(UserWithAccountDto::fromModel)
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
         return CollectionModel.of(entityModelList,
@@ -29,8 +35,9 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public EntityModel<User> one(@PathVariable Long id){
+    public EntityModel<UserWithAccountDto> one(@PathVariable Long id){
         return repository.findById(id)
+                .map(UserWithAccountDto::fromModel)
                 .map(assembler::toModel)
                 .orElseThrow( () -> new UserNotFoundException(id) );
     }

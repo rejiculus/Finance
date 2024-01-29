@@ -16,7 +16,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/admin/accounts")
 public class AccountController {
     private AccountRepository repository;
     private AccountModelAssembler assembler;
