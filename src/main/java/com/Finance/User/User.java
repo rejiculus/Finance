@@ -1,16 +1,13 @@
 package com.Finance.User;
 
 import com.Finance.Account.Account;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.Finance.Currency;
+import jakarta.persistence.*;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 
 @Entity
+@Table(name = "bank_users")
 public class User {
     @Id
     @GeneratedValue
@@ -21,15 +18,15 @@ public class User {
     @Column(name="user_password")
     private String password;
 
-    private Map<Long, Account> accounts;
+    @OneToMany(mappedBy = "bankUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> accounts = new ArrayList<>();
 
     public User(){}
     public User(String username, String password){
         this.username = username;
         this.password = password;//todo encrypt
-        this.accounts = new TreeMap<>();
     }
-    public User(String username, String password, Map<Long, Account> accounts){
+    public User(String username, String password, List<Account> accounts){
         this.username = username;
         this.password = password;//todo encrypt
         this.accounts = accounts;
@@ -59,12 +56,37 @@ public class User {
         this.password = password;
     }
 
-    public Map<Long, Account> getAccounts() {
+    public List<Account> getAccounts() {
         return accounts;
     }
 
-    public void setAccounts(Map<Long, Account> accounts) {
+    public void setAccounts(List<Account> accounts) {
         this.accounts = accounts;
+    }
+    public void addAccount(Account account){
+        account.setBankUser(this);
+        this.accounts.add(account);
+    }
+    public void removeAccount(Account account){
+        this.accounts.remove(account);
+        account.setBankUser(null);
+    }
+    public Account createAccount(double amount, Currency currency){
+        Account account = new Account(this, amount, currency);
+        this.accounts.add(account);
+        return account;
+    }
+    public String showAccountsId(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for(int i=0;i<accounts.size();i++){
+            sb.append(accounts.get(i).getId());
+            if(i!=accounts.size()-1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
     @Override
@@ -86,7 +108,7 @@ public class User {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", accounts=" + accounts +
+                ", accounts=" + "i will do it later" +
                 '}';
     }
 }
